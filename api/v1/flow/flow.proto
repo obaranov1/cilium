@@ -91,6 +91,18 @@ message Flow {
     // any.
     TraceContext trace_context = 30;
 
+    // sock_xlate_point is the socket translation point.
+    // Only applicable to TraceSock notifications, blank for other types
+    SocketTranslationPoint sock_xlate_point = 31;
+
+    // socket_cookie is the Linux kernel socket cookie for this flow.
+    // Only applicable to TraceSock notifications, zero for other types
+    uint64 socket_cookie = 32;
+
+    // cgroup_id of the process which emitted this event.
+    // Only applicable to TraceSock notifications, zero for other types
+    uint64 cgroup_id = 33;
+
     // This is a temporary workaround to support summary field for pb.Flow without
     // duplicating logic from the old parser. This field will be removed once we
     // fully migrate to the new parser.
@@ -101,6 +113,7 @@ enum FlowType {
     UNKNOWN_TYPE = 0;
     L3_L4 = 1; // not sure about the underscore here, but `L34` also reads strange
     L7 = 2;
+    SOCK = 3;
 }
 
 enum TraceObservationPoint {
@@ -644,6 +657,15 @@ message ServiceDeleteNotification {
 message NetworkInterface {
     uint32 index = 1;
     string name = 2;
+}
+
+// This mirrors enum xlate_point in bpf/lib/trace_sock.h
+enum SocketTranslationPoint {
+    SOCK_XLATE_POINT_UNKNOWN = 0;
+    SOCK_XLATE_POINT_PRE_DIRECTION_FWD = 1; // Pre service translation
+    SOCK_XLATE_POINT_POST_DIRECTION_FWD = 2; // Post service translation
+    SOCK_XLATE_POINT_PRE_DIRECTION_REV = 3;   // Pre reverse service translation
+    SOCK_XLATE_POINT_POST_DIRECTION_REV = 4; // Post reverse service translation
 }
 
 message DebugEvent {
